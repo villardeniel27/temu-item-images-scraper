@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Descargar Imágenes de Temu</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; margin: 20px; }
+        input, button { padding: 10px; margin: 10px; width: 80%; max-width: 400px; }
+        img { max-width: 100px; margin: 5px; display: inline-block; }
+    </style>
+</head>
+<body>
+
+    <h2>Descargar Imágenes de Temu</h2>
+    <input type="text" id="temuUrl" placeholder="Pega el enlace de Temu aquí">
+    <button onclick="extraerImagenes()">Obtener Imágenes</button>
+    <div id="imagenes"></div>
+
+    <script>
+        async function extraerImagenes() {
+            const url = document.getElementById('temuUrl').value;
+            if (!url.includes("temu.com")) {
+                alert("Por favor, ingresa un enlace válido de Temu.");
+                return;
+            }
+
+            try {
+                const response = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(url)}`);
+                const data = await response.json();
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(data.contents, "text/html");
+                const imagenes = Array.from(doc.querySelectorAll("img"));
+                
+                document.getElementById('imagenes').innerHTML = "";
+                
+                imagenes.forEach(img => {
+                    if (img.src.includes("https")) {
+                        let imgElement = document.createElement("img");
+                        imgElement.src = img.src;
+                        document.getElementById('imagenes').appendChild(imgElement);
+
+                        let link = document.createElement("a");
+                        link.href = img.src;
+                        link.download = "imagen-temu.jpg";
+                        link.innerText = "Descargar";
+                        link.style.display = "block";
+                        document.getElementById('imagenes').appendChild(link);
+                    }
+                });
+
+                if (imagenes.length === 0) alert("No se encontraron imágenes en la página.");
+            } catch (error) {
+                alert("Error al obtener las imágenes.");
+            }
+        }
+    </script>
+
+</body>
+</html>
